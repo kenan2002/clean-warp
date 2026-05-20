@@ -489,6 +489,10 @@ pub(super) fn maybe_add_buy_credits_banner(
     is_input_at_top: bool,
     app: &AppContext,
 ) {
+    if warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled() {
+        // clean-warp: no hosted credits to buy, never show the banner.
+        return;
+    }
     let can_purchase_addon_credits = UserWorkspaces::as_ref(app)
         .current_team()
         .and_then(|team| team.billing_metadata.tier.purchase_add_on_credits_policy)
