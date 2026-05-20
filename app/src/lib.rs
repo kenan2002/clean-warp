@@ -88,7 +88,6 @@ mod user_config;
 pub mod util;
 mod view_components;
 mod vim_registers;
-mod voice;
 mod voltron;
 mod warp_managed_paths_watcher;
 #[cfg(target_family = "wasm")]
@@ -159,10 +158,8 @@ use quit_warning::UnsavedStateSummary;
 use server::network_log_pane_manager::NetworkLogPaneManager;
 use server::network_logging::NetworkLogModel;
 use server::telemetry::context_provider::AppTelemetryContextProvider;
-use server::voice_transcriber::ServerVoiceTranscriber;
 #[cfg(feature = "local_fs")]
 use settings::import::model::ImportedConfigModel;
-use voice::transcriber::VoiceTranscriber;
 use warp_cli::GlobalOptions;
 use warp_cli::{agent::AgentCommand, CliCommand};
 
@@ -1660,9 +1657,6 @@ pub(crate) fn initialize_app(
 
     #[cfg(feature = "voice_input")]
     ctx.add_singleton_model(voice_input::VoiceInput::new);
-    ctx.add_singleton_model(|_| {
-        VoiceTranscriber::new(Arc::new(ServerVoiceTranscriber::new(server_api.clone())))
-    });
 
     let notebooks = cloud_objects
         .iter()
