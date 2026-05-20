@@ -24,7 +24,10 @@ fn main() -> Result<()> {
             mcp_static_config: None,
         },
     )
-    .with_additional_features(&[FeatureFlag::SkipFirebaseAnonymousUser]);
+    .with_additional_features(&[
+        FeatureFlag::SkipFirebaseAnonymousUser,
+        FeatureFlag::SoloUserByok,
+    ]);
     if cfg!(debug_assertions) {
         state = state.with_additional_features(warp_core::features::DEBUG_FLAGS);
     }
