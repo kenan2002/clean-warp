@@ -22784,15 +22784,20 @@ impl TerminalView {
             );
         }
 
-        if let Some(banner_state) = &self.inline_banners_state.agent_setup_speedbump_banner {
-            inline_banners.insert(
-                banner_state.id,
-                render_agent_mode_setup_banner(banner_state, appearance),
-            );
-        }
+        let clean_warp =
+            warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
+        if !clean_warp {
+            if let Some(banner_state) = &self.inline_banners_state.agent_setup_speedbump_banner {
+                inline_banners.insert(
+                    banner_state.id,
+                    render_agent_mode_setup_banner(banner_state, appearance),
+                );
+            }
 
-        if let Some(banner_state) = &self.inline_banners_state.anonymous_user_ai_sign_up_banner {
-            inline_banners.insert(banner_state.id, banner_state.render(appearance));
+            if let Some(banner_state) = &self.inline_banners_state.anonymous_user_ai_sign_up_banner
+            {
+                inline_banners.insert(banner_state.id, banner_state.render(appearance));
+            }
         }
 
         if let Some(banner_state) = &self.inline_banners_state.aws_bedrock_login_banner {
