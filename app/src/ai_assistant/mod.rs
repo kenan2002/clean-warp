@@ -20,7 +20,6 @@ use warp_graphql::{
     mutations::generate_commands::{GenerateCommandsFailureType, GeneratedCommand},
 };
 
-pub mod execution_context;
 pub mod panel;
 pub mod requests;
 pub mod transcript;

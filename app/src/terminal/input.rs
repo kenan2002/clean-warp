@@ -160,7 +160,7 @@ use crate::{
         },
         AIRequestUsageModel,
     },
-    ai_assistant::execution_context::WarpAiExecutionContext,
+    ai::execution_context::WarpAiExecutionContext,
     appearance::{Appearance, AppearanceEvent},
     channel::{Channel, ChannelState},
     cloud_object::{

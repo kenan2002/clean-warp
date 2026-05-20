@@ -1,10 +1,8 @@
 use super::workflows::{WorkflowIdentity, WorkflowSearchItem};
 use crate::{
     ai::AIRequestUsageModel,
-    ai_assistant::{
-        execution_context::WarpAiExecutionContext, GenerateCommandsFromNaturalLanguageError,
-        AI_ASSISTANT_LOGO_COLOR,
-    },
+    ai::execution_context::WarpAiExecutionContext,
+    ai_assistant::{GenerateCommandsFromNaturalLanguageError, AI_ASSISTANT_LOGO_COLOR},
     appearance::Appearance,
     features::FeatureFlag,
     search::{

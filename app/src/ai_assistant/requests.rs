@@ -20,10 +20,9 @@ use crate::{
     workspaces::user_workspaces::UserWorkspaces,
 };
 
-use super::{
-    execution_context::WarpAiExecutionContext,
-    utils::{markdown_segments_from_text, FormattedTranscriptMessage, TranscriptPart},
-};
+use crate::ai::execution_context::WarpAiExecutionContext;
+
+use super::utils::{markdown_segments_from_text, FormattedTranscriptMessage, TranscriptPart};
 use anyhow::Result;
 
 /// The key for the corresponding entry in UserDefaults.

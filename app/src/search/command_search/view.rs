@@ -25,9 +25,8 @@ use warpui::{
 };
 
 use crate::{
-    ai_assistant::{
-        execution_context::WarpAiExecutionContext, GenerateCommandsFromNaturalLanguageError,
-    },
+    ai::execution_context::WarpAiExecutionContext,
+    ai_assistant::GenerateCommandsFromNaturalLanguageError,
     appearance::Appearance,
     auth::{
         auth_manager::AuthManager, auth_state::AuthState, auth_view_modal::AuthViewVariant,

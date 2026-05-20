@@ -46,7 +46,7 @@ use warpui::elements::ParentElement;
 use warpui::elements::Resizable;
 use warpui::elements::ResizableStateHandle;
 
-use super::execution_context::WarpAiExecutionContext;
+use crate::ai::execution_context::WarpAiExecutionContext;
 use super::requests::{Event as RequestsEvent, RequestStatus, Requests};
 use super::transcript::{Transcript, TranscriptEvent};
 use super::utils::{render_prepared_response_button, render_request_limit_info, TranscriptPart};
