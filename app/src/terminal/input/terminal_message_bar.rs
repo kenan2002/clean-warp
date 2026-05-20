@@ -341,6 +341,10 @@ impl MessageProvider<TerminalMessageArgs<'_>> for DefaultMessageProducer {
             keybinding_name_to_keystroke(commands::NEW.name, args.app)
         };
 
+        if warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled() {
+            // clean-warp: no /agent conversation hint — agent mode is hidden.
+            return None;
+        }
         if let Some(keystroke) = keystroke {
             Some(Message::new(vec![
                 MessageItem::keystroke(keystroke),
