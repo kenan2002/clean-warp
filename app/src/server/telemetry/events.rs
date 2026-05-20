@@ -2446,7 +2446,6 @@ pub enum TelemetryEvent {
         shell_path: Option<String>,
         reason: String,
         reason_details: Option<String>,
-        antivirus_name: Option<String>,
         long_os_version: Option<String>,
         exit_reason: Option<String>,
     },
@@ -4027,7 +4026,6 @@ impl TelemetryEvent {
                 shell_path,
                 reason,
                 reason_details,
-                antivirus_name,
                 long_os_version,
                 exit_reason,
             } => Some(json!({
@@ -4035,7 +4033,6 @@ impl TelemetryEvent {
                 "shell_path": shell_path,
                 "reason": reason,
                 "reason_details": reason_details,
-                "antivirus_name": antivirus_name,
                 "long_os_version": long_os_version,
                 "exit_reason": exit_reason,
             })),

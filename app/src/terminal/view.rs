@@ -569,7 +569,6 @@ use super::warpify::success_block::{WarpifySuccessBlock, WarpifySuccessBlockEven
 use super::warpify::trigger_state::{SshBlockState, WarpifyState};
 use super::warpify::WarpificationSource;
 use super::{GridType, HistoryEvent};
-use crate::antivirus::AntivirusInfo;
 use crate::terminal::links::should_directly_open_link;
 use crate::terminal::model_events::{AnsiHandlerEvent, ModelEvent, ModelEventDispatcher};
 use action::RememberForWarpification;
@@ -10346,7 +10345,6 @@ impl TerminalView {
 
             if let Some(termination_reason) = termination_reason {
                 let (shell_path, shell_type) = self.get_shell_starter_local(ctx).unzip();
-                let antivirus_name = AntivirusInfo::as_ref(ctx).get();
 
                 let long_os_version = crate::system::long_os_version(ctx);
 
@@ -10356,7 +10354,6 @@ impl TerminalView {
                         shell_path,
                         reason: termination_reason,
                         reason_details: termination_details,
-                        antivirus_name: antivirus_name.map(ToOwned::to_owned),
                         long_os_version,
                         exit_reason: exit_reason.map(|exit_reason| format!("{exit_reason:?}")),
                     },
