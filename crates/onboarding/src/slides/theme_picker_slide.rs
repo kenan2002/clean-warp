@@ -654,9 +654,13 @@ impl ThemePickerSlide {
 
     fn next(&mut self, ctx: &mut ViewContext<Self>) {
         self.onboarding_state.update(ctx, |model, ctx| {
-            if FeatureFlag::OpenWarpNewSettingsModes.is_enabled() {
+            if FeatureFlag::OpenWarpNewSettingsModes.is_enabled()
+                && !FeatureFlag::SkipFirebaseAnonymousUser.is_enabled()
+            {
+                // Upstream flow: ThemePicker is the last slide → finalize.
                 model.complete(ctx);
             } else {
+                // clean-warp / legacy flow: ThemePicker is mid-flow → advance.
                 model.next(ctx);
             }
         });
