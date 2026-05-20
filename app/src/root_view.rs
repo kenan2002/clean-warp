@@ -2202,7 +2202,8 @@ impl RootView {
                 // With old onboarding, we ask user to log in before onboarding, so don't do it after onboarding completes.
                 let requires_login = !is_logged_in
                     && (ai_enabled || warp_drive_enabled)
-                    && FeatureFlag::OpenWarpNewSettingsModes.is_enabled();
+                    && FeatureFlag::OpenWarpNewSettingsModes.is_enabled()
+                    && !FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
 
                 if requires_login {
                     let tutorial = OnboardingTutorial::from(selected_settings.clone());
