@@ -1687,7 +1687,12 @@ impl RootView {
                     let should_show_pre_login_onboarding = FeatureFlag::OpenWarpNewSettingsModes.is_enabled()
                         && FeatureFlag::AgentOnboarding.is_enabled()
                         && !has_completed_local_onboarding;
-                    if FeatureFlag::ForceLogin.is_enabled() {
+                    if FeatureFlag::SkipFirebaseAnonymousUser.is_enabled() {
+                        // clean-warp: take precedence over ForceLogin and pre-login
+                        // onboarding so the OSS binary boots straight into a terminal
+                        // with no account flow at all.
+                        AuthOnboardingState::Terminal(workspace_args.create_workspace(ctx))
+                    } else if FeatureFlag::ForceLogin.is_enabled() {
                         // ForceLogin is true for Preview
                         AuthOnboardingState::Auth(workspace_args.into())
                     } else if should_show_pre_login_onboarding {
@@ -1700,10 +1705,6 @@ impl RootView {
                             onboarding_view,
                             target: AuthOnboardingTarget::Workspace(workspace_args_box),
                         }
-                    } else if FeatureFlag::SkipFirebaseAnonymousUser.is_enabled() {
-                        // When SkipFirebaseAnonymousUser is enabled, skip the login screen
-                        // entirely and go directly into the workspace.
-                        AuthOnboardingState::Terminal(workspace_args.create_workspace(ctx))
                     } else {
                         AuthOnboardingState::Auth(workspace_args.into())
                     }
