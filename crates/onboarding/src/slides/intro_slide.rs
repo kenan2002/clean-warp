@@ -105,15 +105,19 @@ impl View for IntroSlide {
 
         let mut stack = Stack::new();
         stack.add_child(centered);
-        stack.add_positioned_child(
-            login_row,
-            OffsetPositioning::offset_from_parent(
-                vec2f(0., -28.),
-                ParentOffsetBounds::ParentBySize,
-                ParentAnchor::BottomMiddle,
-                ChildAnchor::BottomMiddle,
-            ),
-        );
+        if !warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled() {
+            stack.add_positioned_child(
+                login_row,
+                OffsetPositioning::offset_from_parent(
+                    vec2f(0., -28.),
+                    ParentOffsetBounds::ParentBySize,
+                    ParentAnchor::BottomMiddle,
+                    ChildAnchor::BottomMiddle,
+                ),
+            );
+        } else {
+            let _ = login_row;
+        }
         stack.finish()
     }
 }

@@ -269,7 +269,8 @@ impl ThemePickerSlide {
             },
         );
 
-        let theme_picker_last = FeatureFlag::OpenWarpNewSettingsModes.is_enabled();
+        let theme_picker_last = FeatureFlag::OpenWarpNewSettingsModes.is_enabled()
+            && !FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
         let next_label = if theme_picker_last {
             "Get Warping"
         } else {
@@ -292,7 +293,11 @@ impl ThemePickerSlide {
             },
         );
 
-        let (step_index, step_count) = if theme_picker_last {
+        let clean_warp = FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
+        let (step_index, step_count) = if clean_warp {
+            // clean-warp flow: Intro → ThemePicker(1) → Customize → Project
+            (1, 4)
+        } else if theme_picker_last {
             let is_terminal = matches!(
                 self.onboarding_state.as_ref(app).intention(),
                 OnboardingIntention::Terminal

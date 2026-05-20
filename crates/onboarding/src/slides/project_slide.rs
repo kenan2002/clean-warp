@@ -291,7 +291,8 @@ impl ProjectSlide {
         );
 
         let theme_picker_last =
-            warp_core::features::FeatureFlag::OpenWarpNewSettingsModes.is_enabled();
+            warp_core::features::FeatureFlag::OpenWarpNewSettingsModes.is_enabled()
+                && !warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
 
         let (label, keystroke, action) = match settings {
             ProjectOnboardingSettings::Project { .. } => (

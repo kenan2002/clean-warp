@@ -438,7 +438,14 @@ impl CustomizeUISlide {
         );
 
         let is_terminal = matches!(intention, OnboardingIntention::Terminal);
-        let (step_index, step_count) = if is_terminal { (1, 4) } else { (1, 5) };
+        let (step_index, step_count) = if warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled() {
+            // clean-warp flow: Intro → ThemePicker → Customize(2) → Project
+            (2, 4)
+        } else if is_terminal {
+            (1, 4)
+        } else {
+            (1, 5)
+        };
         bottom_nav::onboarding_bottom_nav(
             appearance,
             step_index,
