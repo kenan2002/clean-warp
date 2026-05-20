@@ -112,8 +112,30 @@ impl StaticCommand {
     }
 
     pub fn is_active(&self, session_context: Availability) -> bool {
+        if warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled()
+            && Self::CLEAN_WARP_HIDDEN.contains(&self.name)
+        {
+            return false;
+        }
         session_context.contains(self.availability)
     }
+
+    /// clean-warp: slash commands that are cloud / login-gated and should never
+    /// surface in the OSS BYOA build.
+    const CLEAN_WARP_HIDDEN: &'static [&'static str] = &[
+        "/agent",
+        "/cloud-agent",
+        "/add-mcp",
+        "/pr-comments",
+        "/create-environment",
+        "/docker-sandbox",
+        "/create-new-project",
+        "/handoff",
+        "/open-code-review",
+        "/index",
+        "/init",
+        "/fork",
+    ];
 }
 
 #[cfg(test)]
