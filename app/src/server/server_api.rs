@@ -1037,31 +1037,89 @@ impl ServerApi {
             .flush_and_persist_events(max_event_count, settings_snapshot)
     }
 
-    /// Hits the /ai/generate_input_suggestions endpoint to get the predicted next action, based on past context.
+    /// BYOA next-command autosuggest. Calls OpenAI's chat completions endpoint with the
+    /// user-supplied `OPENAI_API_KEY` from the environment. Falls back to empty suggestions
+    /// (no error) when the key is absent so the input bar stays usable offline.
+    ///
+    /// The model selection is overridable via `WARP_BYOA_MODEL` (default: `gpt-4o-mini`)
+    /// and the endpoint via `WARP_BYOA_BASE_URL` (default: `https://api.openai.com/v1`),
+    /// so OpenAI-compatible servers (Ollama, vLLM, LM Studio, Azure, etc.) work too.
     pub async fn generate_ai_input_suggestions(
         &self,
         request: &GenerateAIInputSuggestionsRequest,
     ) -> Result<generate_ai_input_suggestions::GenerateAIInputSuggestionsResponseV2, AIApiError>
     {
-        let auth_token = self.get_or_refresh_access_token().await?;
+        use generate_ai_input_suggestions::GenerateAIInputSuggestionsResponseV2;
 
-        let request_builder = self.client.post(format!(
-            "{}/ai/generate_input_suggestions",
-            ChannelState::server_root_url()
-        ));
-        let response = if let Some(token) = auth_token.as_bearer_token() {
-            request_builder.bearer_auth(token)
+        let Ok(api_key) = std::env::var("OPENAI_API_KEY") else {
+            return Ok(GenerateAIInputSuggestionsResponseV2::default());
+        };
+        let base_url = std::env::var("WARP_BYOA_BASE_URL")
+            .unwrap_or_else(|_| "https://api.openai.com/v1".to_string());
+        let model = std::env::var("WARP_BYOA_MODEL")
+            .unwrap_or_else(|_| "gpt-4o-mini".to_string());
+
+        let prefix = request.prefix.clone().unwrap_or_default();
+        let history = &request.history_context;
+        let context = request.context_messages.join("\n");
+        let system_ctx = request.system_context.clone().unwrap_or_default();
+        let rejected = request.rejected_suggestions.join(" | ");
+
+        let system_msg = format!(
+            "You are a shell-command autocomplete engine. Given recent shell history, terminal output, and what the user has typed so far, suggest 1-3 likely next commands. Reply with JSON only: {{\"commands\": [\"cmd1\", \"cmd2\"]}}. Each command must be a complete runnable shell command. Do not include suggestions previously rejected.\nEnvironment: {system_ctx}"
+        );
+        let user_msg = format!(
+            "Recent history:\n{history}\n\nRecent terminal context:\n{context}\n\nRejected suggestions: {rejected}\n\nUser typed: \"{prefix}\"\n\nReturn the JSON object."
+        );
+
+        let body = serde_json::json!({
+            "model": model,
+            "response_format": { "type": "json_object" },
+            "messages": [
+                { "role": "system", "content": system_msg },
+                { "role": "user", "content": user_msg },
+            ],
+        });
+
+        let resp = self
+            .client
+            .post(format!("{base_url}/chat/completions"))
+            .bearer_auth(&api_key)
+            .json(&body)
+            .send()
+            .await?
+            .error_for_status()?;
+        let resp_json: serde_json::Value = resp.json().await?;
+        let content = resp_json
+            .get("choices")
+            .and_then(|c| c.get(0))
+            .and_then(|c| c.get("message"))
+            .and_then(|m| m.get("content"))
+            .and_then(|c| c.as_str())
+            .unwrap_or("{}");
+        let parsed: serde_json::Value =
+            serde_json::from_str(content).unwrap_or(serde_json::json!({}));
+        let commands: Vec<String> = parsed
+            .get("commands")
+            .and_then(|c| c.as_array())
+            .map(|a| {
+                a.iter()
+                    .filter_map(|v| v.as_str().map(String::from))
+                    .filter(|s| !s.is_empty())
+                    .collect()
+            })
+            .unwrap_or_default();
+
+        let most_likely_action = if commands.is_empty() {
+            String::new()
         } else {
-            request_builder
-        }
-        .json(request)
-        .send()
-        .await?
-        .error_for_status_with_body()
-        .await?
-        .json()
-        .await?;
-        Ok(response)
+            "Command".to_string()
+        };
+        Ok(GenerateAIInputSuggestionsResponseV2 {
+            commands,
+            ai_queries: Vec::new(),
+            most_likely_action,
+        })
     }
 
     pub async fn get_relevant_files(
