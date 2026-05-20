@@ -73,6 +73,7 @@ impl HeaderToolbarItemKind {
                 AISettings::as_ref(app).is_any_ai_enabled(app)
                     && FeatureFlag::AgentManagementView.is_enabled()
                     && !is_web_anonymous_user
+                    && !FeatureFlag::SkipFirebaseAnonymousUser.is_enabled()
             }
             Self::CodeReview => cfg!(feature = "local_fs"),
             Self::NotificationsMailbox => FeatureFlag::HOANotifications.is_enabled(),

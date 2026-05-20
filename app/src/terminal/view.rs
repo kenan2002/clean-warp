@@ -16084,11 +16084,15 @@ impl TerminalView {
                     "Scroll to bottom of blocks"
                 };
 
-                // currently, we don't support share for multi selections
-                let is_share_disabled =
-                    !is_single_selection || (is_active_block_selected && is_active_block_running);
+                // currently, we don't support share for multi selections.
+                // clean-warp: also disable share entirely since it requires cloud auth.
+                let is_share_disabled = !is_single_selection
+                    || (is_active_block_selected && is_active_block_running)
+                    || FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
 
-                let is_ask_ai_disabled = !is_single_selection;
+                // clean-warp: 'Ask AI' opens the Warp AI cloud chat panel — disable it.
+                let is_ask_ai_disabled = !is_single_selection
+                    || FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
 
                 let is_copy_commands_disabled =
                     is_single_selection && tail_block.command_to_string().trim().is_empty();
