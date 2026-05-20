@@ -27,6 +27,7 @@ fn main() -> Result<()> {
     .with_additional_features(&[
         FeatureFlag::SkipFirebaseAnonymousUser,
         FeatureFlag::SoloUserByok,
+        FeatureFlag::CycleNextCommandSuggestion,
     ]);
     if cfg!(debug_assertions) {
         state = state.with_additional_features(warp_core::features::DEBUG_FLAGS);
