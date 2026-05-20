@@ -475,7 +475,6 @@ pub enum DriveIndexEvent {
     },
     OpenWorkflowModalWithCloudWorkflow(SyncId),
     FocusWarpDrive,
-    OpenSharedObjectsCreationDeniedModal(DriveObjectType, ServerId),
     AttachPlanAsContext(AIDocumentId),
 }
 
@@ -3292,12 +3291,6 @@ impl DriveIndex {
                     if !UserWorkspaces::has_capacity_for_shared_notebooks(team_uid, ctx, 1) {
                         // If team has reached the limit for notebooks, show the modal
                         // and return early.
-                        ctx.emit(DriveIndexEvent::OpenSharedObjectsCreationDeniedModal(
-                            DriveObjectType::Notebook {
-                                is_ai_document: false,
-                            },
-                            team_uid,
-                        ));
                         return;
                     }
                 }
@@ -3305,10 +3298,6 @@ impl DriveIndex {
                     if !UserWorkspaces::has_capacity_for_shared_workflows(team_uid, ctx, 1) {
                         // If team has reached the limit for workflows, show the modal
                         // and return early.
-                        ctx.emit(DriveIndexEvent::OpenSharedObjectsCreationDeniedModal(
-                            DriveObjectType::Workflow,
-                            team_uid,
-                        ));
                         return;
                     }
                 }
@@ -3414,10 +3403,6 @@ impl DriveIndex {
                     if !UserWorkspaces::has_capacity_for_shared_notebooks(team_uid, ctx, 1) {
                         // If team has reached the limit for notebooks, show the modal
                         // and return early.
-                        ctx.emit(DriveIndexEvent::OpenSharedObjectsCreationDeniedModal(
-                            object_type,
-                            team_uid,
-                        ));
                         return;
                     }
                 }
@@ -3542,12 +3527,6 @@ impl DriveIndex {
                             {
                                 // If team has reached the limit for notebooks, show the modal
                                 // and return early.
-                                ctx.emit(DriveIndexEvent::OpenSharedObjectsCreationDeniedModal(
-                                    DriveObjectType::Notebook {
-                                        is_ai_document: false,
-                                    },
-                                    team_uid,
-                                ));
                                 return;
                             }
                         }
@@ -3556,10 +3535,6 @@ impl DriveIndex {
                             {
                                 // If team has reached the limit for workflows, show the modal
                                 // and return early.
-                                ctx.emit(DriveIndexEvent::OpenSharedObjectsCreationDeniedModal(
-                                    DriveObjectType::Workflow,
-                                    team_uid,
-                                ));
                                 return;
                             }
                         }
@@ -3588,12 +3563,6 @@ impl DriveIndex {
                             ) {
                                 // If team has reached the limit for notebooks, show the modal
                                 // and return early.
-                                ctx.emit(DriveIndexEvent::OpenSharedObjectsCreationDeniedModal(
-                                    DriveObjectType::Notebook {
-                                        is_ai_document: false,
-                                    },
-                                    team_uid,
-                                ));
                                 return;
                             }
 
@@ -3609,10 +3578,6 @@ impl DriveIndex {
                             ) {
                                 // If team has reached the limit for workflows, show the modal
                                 // and return early.
-                                ctx.emit(DriveIndexEvent::OpenSharedObjectsCreationDeniedModal(
-                                    DriveObjectType::Workflow,
-                                    team_uid,
-                                ));
                                 return;
                             }
                         }

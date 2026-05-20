@@ -17,7 +17,7 @@ use crate::{
     notebooks::{manager::NotebookSource, CloudNotebook},
     server::{
         cloud_objects::update_manager::{InitiatedBy, UpdateManager},
-        ids::{ClientId, ServerId, SyncId},
+        ids::{ClientId, SyncId},
         telemetry::SharingDialogSource,
     },
     workflows::{manager::WorkflowOpenSource, CloudWorkflow, WorkflowViewMode},
@@ -70,7 +70,6 @@ pub enum DrivePanelEvent {
         in_subshell: bool,
     },
     OpenSearch,
-    OpenSharedObjectsCreationDeniedModal(DriveObjectType, ServerId),
     OpenTeamSettingsPage,
     OpenAIFactCollection,
     OpenMCPServerCollection,
@@ -305,11 +304,6 @@ impl DrivePanel {
                 self.open_workflow_modal_with_existing(*workflow_id, ctx)
             }
             DriveIndexEvent::FocusWarpDrive => ctx.emit(DrivePanelEvent::FocusWarpDrive),
-            DriveIndexEvent::OpenSharedObjectsCreationDeniedModal(object_type, team_uid) => ctx
-                .emit(DrivePanelEvent::OpenSharedObjectsCreationDeniedModal(
-                    *object_type,
-                    *team_uid,
-                )),
             DriveIndexEvent::InvokeEnvVarCollectionInSubshell(id) => {
                 let cloud_model = CloudModel::as_ref(ctx);
                 let object = cloud_model.get_by_uid(&id.uid());
@@ -370,12 +364,6 @@ impl DrivePanel {
                             {
                                 // If team has reached the limit for notebooks, show the modal
                                 // and return early.
-                                ctx.emit(DrivePanelEvent::OpenSharedObjectsCreationDeniedModal(
-                                    DriveObjectType::Notebook {
-                                        is_ai_document: false,
-                                    },
-                                    team_uid,
-                                ));
                                 return;
                             }
                         }
@@ -384,10 +372,6 @@ impl DrivePanel {
                             {
                                 // If team has reached the limit for workflows, show the modal
                                 // and return early.
-                                ctx.emit(DrivePanelEvent::OpenSharedObjectsCreationDeniedModal(
-                                    DriveObjectType::Workflow,
-                                    team_uid,
-                                ));
                                 return;
                             }
                         }
