@@ -1110,11 +1110,9 @@ impl ServerApi {
             })
             .unwrap_or_default();
 
-        let most_likely_action = if commands.is_empty() {
-            String::new()
-        } else {
-            "Command".to_string()
-        };
+        // `most_likely_action` is the actual suggested command string (shown as
+        // ghost text in the input), not an enum tag — use the top suggestion.
+        let most_likely_action = commands.first().cloned().unwrap_or_default();
         Ok(GenerateAIInputSuggestionsResponseV2 {
             commands,
             ai_queries: Vec::new(),
