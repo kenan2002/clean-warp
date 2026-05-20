@@ -5,6 +5,7 @@
 use anyhow::Result;
 use warp_core::{
     channel::{Channel, ChannelConfig, ChannelState, OzConfig, WarpServerConfig},
+    features::FeatureFlag,
     AppId,
 };
 
@@ -22,7 +23,8 @@ fn main() -> Result<()> {
             autoupdate_config: None,
             mcp_static_config: None,
         },
-    );
+    )
+    .with_additional_features(&[FeatureFlag::SkipFirebaseAnonymousUser]);
     if cfg!(debug_assertions) {
         state = state.with_additional_features(warp_core::features::DEBUG_FLAGS);
     }
