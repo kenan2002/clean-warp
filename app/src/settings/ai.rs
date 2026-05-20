@@ -1554,10 +1554,15 @@ impl AISettings {
     }
 
     pub fn is_any_ai_enabled(&self, app: &AppContext) -> bool {
-        // Disable AI for anonymous and logged-out users.
-        let is_anonymous_or_logged_out = AuthStateProvider::as_ref(app)
-            .get()
-            .is_anonymous_or_logged_out();
+        // clean-warp: under SkipFirebaseAnonymousUser the user is always
+        // anonymous, but AI is supplied via the user's own API key (BYOA), so
+        // don't disable AI here — let the runtime key gate decide.
+        let clean_warp_byoa =
+            warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
+        let is_anonymous_or_logged_out = !clean_warp_byoa
+            && AuthStateProvider::as_ref(app)
+                .get()
+                .is_anonymous_or_logged_out();
 
         *self.is_any_ai_enabled
             && !is_anonymous_or_logged_out
