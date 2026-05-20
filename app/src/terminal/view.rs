@@ -22777,16 +22777,18 @@ impl TerminalView {
             );
         }
 
-        if let Some(banner_state) = &self.inline_banners_state.codebase_index_speedbump_banner {
-            inline_banners.insert(
-                banner_state.id,
-                banner_state.render_codebase_index_speedbump_banner(appearance),
-            );
-        }
-
         let clean_warp =
             warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
         if !clean_warp {
+            if let Some(banner_state) =
+                &self.inline_banners_state.codebase_index_speedbump_banner
+            {
+                inline_banners.insert(
+                    banner_state.id,
+                    banner_state.render_codebase_index_speedbump_banner(appearance),
+                );
+            }
+
             if let Some(banner_state) = &self.inline_banners_state.agent_setup_speedbump_banner {
                 inline_banners.insert(
                     banner_state.id,
@@ -22800,11 +22802,13 @@ impl TerminalView {
             }
         }
 
-        if let Some(banner_state) = &self.inline_banners_state.aws_bedrock_login_banner {
-            inline_banners.insert(
+        if !clean_warp {
+            if let Some(banner_state) = &self.inline_banners_state.aws_bedrock_login_banner {
+                inline_banners.insert(
                 banner_state.id,
                 render_aws_bedrock_login_banner(banner_state, appearance),
             );
+            }
         }
 
         if let Some(banner_state) = &self.inline_banners_state.aws_cli_not_installed_banner {
