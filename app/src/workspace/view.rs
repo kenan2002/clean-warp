@@ -19660,6 +19660,9 @@ impl Workspace {
     }
 
     fn render_reauth_banner_element(&self) -> Option<WorkspaceBannerFields> {
+        if FeatureFlag::SkipFirebaseAnonymousUser.is_enabled() {
+            return None;
+        }
         if self.reauth_banner_dismissed || !self.auth_state.needs_reauth() {
             return None;
         }
