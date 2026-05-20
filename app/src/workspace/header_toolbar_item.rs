@@ -86,7 +86,10 @@ impl HeaderToolbarItemKind {
             return false;
         }
         match self {
-            Self::CodeReview => *TabSettings::as_ref(app).show_code_review_button.value(),
+            Self::CodeReview => {
+                *TabSettings::as_ref(app).show_code_review_button.value()
+                    && !warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled()
+            }
             Self::NotificationsMailbox => *AISettings::as_ref(app).show_agent_notifications,
             _ => true,
         }

@@ -20562,7 +20562,9 @@ impl Workspace {
         if *tab_settings.show_indicators.value() {
             context.set.insert(flags::TAB_INDICATORS_FLAG);
         }
-        if *tab_settings.show_code_review_button.value() {
+        if *tab_settings.show_code_review_button.value()
+            && !FeatureFlag::SkipFirebaseAnonymousUser.is_enabled()
+        {
             context.set.insert(flags::SHOW_CODE_REVIEW_BUTTON_FLAG);
         }
         if *tab_settings.use_vertical_tabs.value() {
@@ -20928,6 +20930,7 @@ impl Workspace {
         if FeatureFlag::AgentViewConversationListView.is_enabled()
             && AISettings::as_ref(ctx).is_any_ai_enabled(ctx)
             && *AISettings::as_ref(ctx).show_conversation_history
+            && !FeatureFlag::SkipFirebaseAnonymousUser.is_enabled()
         {
             views.push(ToolPanelView::ConversationListView);
         }
@@ -23244,6 +23247,7 @@ impl View for Workspace {
 
         if AISettings::as_ref(app).is_any_ai_enabled(app)
             && *AISettings::as_ref(app).show_conversation_history
+            && !FeatureFlag::SkipFirebaseAnonymousUser.is_enabled()
         {
             context.set.insert(flags::SHOW_CONVERSATION_HISTORY);
         }

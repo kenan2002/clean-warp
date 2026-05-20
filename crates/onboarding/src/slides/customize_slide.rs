@@ -190,18 +190,20 @@ impl CustomizeUISlide {
     ) -> Box<dyn Element> {
         let tab_card = self.render_tab_styling_card(appearance, ui);
         let tools_card = self.render_tools_panel_card(appearance, intention, ui);
-        let code_card = self.render_code_review_card(appearance, ui);
+        // clean-warp: omit the Code-review card — feature is hidden at runtime.
+        let clean_warp =
+            warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
 
-        Container::new(
-            Flex::column()
-                .with_main_axis_size(MainAxisSize::Min)
-                .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
-                .with_spacing(12.)
-                .with_child(tab_card)
-                .with_child(tools_card)
-                .with_child(code_card)
-                .finish(),
-        )
+        let mut column = Flex::column()
+            .with_main_axis_size(MainAxisSize::Min)
+            .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
+            .with_spacing(12.)
+            .with_child(tab_card)
+            .with_child(tools_card);
+        if !clean_warp {
+            column = column.with_child(self.render_code_review_card(appearance, ui));
+        }
+        Container::new(column.finish())
         .with_margin_top(12.)
         .finish()
     }
@@ -254,9 +256,13 @@ impl CustomizeUISlide {
 
         let mut chips = vec![];
 
+        let clean_warp =
+            warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
+
         if ui.tools_panel_enabled(&intention) {
             // Conversation history chip is only shown for the agent intention.
-            if is_agent {
+            // clean-warp: hidden because there is no cloud conversation storage.
+            if is_agent && !clean_warp {
                 chips.push(ChipSpec {
                     label: "Conversation history",
                     is_enabled: ui.show_conversation_history,
@@ -312,23 +318,26 @@ impl CustomizeUISlide {
                 })),
             });
 
-            chips.push(ChipSpec {
-                label: "Warp Drive",
-                is_enabled: ui.show_warp_drive,
-                mouse_state: self.chip_warp_drive_mouse.clone(),
-                on_click: Box::new(|ctx, _, _| {
-                    ctx.dispatch_typed_action(CustomizeSlideAction::ToggleToolsSubSetting {
-                        setting: ToolsPanelSubSetting::WarpDrive,
-                    });
-                }),
-                on_hover: Some(Box::new(|is_hovered, ctx, _, _| {
-                    if is_hovered {
-                        ctx.dispatch_typed_action(CustomizeSlideAction::HoverToolsChip {
+            // clean-warp: drop the Warp Drive chip — no cloud drive.
+            if !clean_warp {
+                chips.push(ChipSpec {
+                    label: "Warp Drive",
+                    is_enabled: ui.show_warp_drive,
+                    mouse_state: self.chip_warp_drive_mouse.clone(),
+                    on_click: Box::new(|ctx, _, _| {
+                        ctx.dispatch_typed_action(CustomizeSlideAction::ToggleToolsSubSetting {
                             setting: ToolsPanelSubSetting::WarpDrive,
                         });
-                    }
-                })),
-            });
+                    }),
+                    on_hover: Some(Box::new(|is_hovered, ctx, _, _| {
+                        if is_hovered {
+                            ctx.dispatch_typed_action(CustomizeSlideAction::HoverToolsChip {
+                                setting: ToolsPanelSubSetting::WarpDrive,
+                            });
+                        }
+                    })),
+                });
+            }
         }
 
         render_toggle_card(
