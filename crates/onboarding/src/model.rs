@@ -665,8 +665,21 @@ impl OnboardingStateModel {
     pub(crate) fn back(&mut self, ctx: &mut ModelContext<Self>) {
         use warp_core::features::FeatureFlag;
         let theme_picker_last = FeatureFlag::OpenWarpNewSettingsModes.is_enabled();
+        let clean_warp = FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
 
-        let prev = if theme_picker_last {
+        let prev = if clean_warp {
+            // clean-warp: Intro → ThemePicker → Customize → Project (no AI slides)
+            match self.step {
+                OnboardingStep::Intro => None,
+                OnboardingStep::ThemePicker => Some(OnboardingStep::Intro),
+                OnboardingStep::Customize => Some(OnboardingStep::ThemePicker),
+                OnboardingStep::Project => Some(OnboardingStep::Customize),
+                // AI-only steps shouldn't be reachable in clean-warp; bounce back to Intro.
+                OnboardingStep::Intention | OnboardingStep::Agent | OnboardingStep::ThirdParty => {
+                    Some(OnboardingStep::Intro)
+                }
+            }
+        } else if theme_picker_last {
             match self.step {
                 OnboardingStep::Intro => None,
                 OnboardingStep::Intention => Some(OnboardingStep::Intro),
@@ -700,8 +713,11 @@ impl OnboardingStateModel {
     pub(crate) fn next(&mut self, ctx: &mut ModelContext<Self>) {
         use warp_core::features::FeatureFlag;
         let theme_picker_last = FeatureFlag::OpenWarpNewSettingsModes.is_enabled();
+        let clean_warp = FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
 
-        let is_last_step = if theme_picker_last {
+        let is_last_step = if clean_warp {
+            matches!(self.step, OnboardingStep::Project)
+        } else if theme_picker_last {
             matches!(self.step, OnboardingStep::ThemePicker)
         } else {
             matches!(self.step, OnboardingStep::Project)
@@ -710,7 +726,19 @@ impl OnboardingStateModel {
             send_telemetry_from_ctx!(OnboardingEvent::SlideNavigatedNext, ctx);
         }
 
-        if theme_picker_last {
+        if clean_warp {
+            // clean-warp: Intro → ThemePicker → Customize → Project (no AI slides)
+            match self.step {
+                OnboardingStep::Intro => self.set_step(OnboardingStep::ThemePicker, ctx),
+                OnboardingStep::ThemePicker => self.set_step(OnboardingStep::Customize, ctx),
+                OnboardingStep::Customize => self.set_step(OnboardingStep::Project, ctx),
+                OnboardingStep::Project => {}
+                // AI-only steps shouldn't be reachable; jump out to Project just in case.
+                OnboardingStep::Intention | OnboardingStep::Agent | OnboardingStep::ThirdParty => {
+                    self.set_step(OnboardingStep::Project, ctx)
+                }
+            }
+        } else if theme_picker_last {
             match self.step {
                 OnboardingStep::Intro => self.set_step(OnboardingStep::Intention, ctx),
                 OnboardingStep::Intention => self.set_step(OnboardingStep::Customize, ctx),
