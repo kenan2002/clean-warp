@@ -326,9 +326,15 @@ impl ProjectSlide {
             },
         );
 
-        // The project slide is unreachable in the new flow (ThirdParty → ThemePicker),
-        // so only the legacy step counts apply.
-        let (step_index, step_count) = (3, 4);
+        let (step_index, step_count) =
+            if warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled() {
+                // clean-warp dotted slides: ThemePicker → Customize → Project(2) (Intro is dotless).
+                (2, 3)
+            } else {
+                // The project slide is unreachable in the new flow (ThirdParty → ThemePicker),
+                // so only the legacy step counts apply.
+                (3, 4)
+            };
         bottom_nav::onboarding_bottom_nav(
             appearance,
             step_index,

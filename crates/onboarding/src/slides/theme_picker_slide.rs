@@ -295,8 +295,9 @@ impl ThemePickerSlide {
 
         let clean_warp = FeatureFlag::SkipFirebaseAnonymousUser.is_enabled();
         let (step_index, step_count) = if clean_warp {
-            // clean-warp flow: Intro → ThemePicker(1) → Customize → Project
-            (1, 4)
+            // clean-warp dotted slides: ThemePicker(0) → Customize → Project.
+            // Intro has no dots so it's not counted.
+            (0, 3)
         } else if theme_picker_last {
             let is_terminal = matches!(
                 self.onboarding_state.as_ref(app).intention(),

@@ -439,8 +439,8 @@ impl CustomizeUISlide {
 
         let is_terminal = matches!(intention, OnboardingIntention::Terminal);
         let (step_index, step_count) = if warp_core::features::FeatureFlag::SkipFirebaseAnonymousUser.is_enabled() {
-            // clean-warp flow: Intro → ThemePicker → Customize(2) → Project
-            (2, 4)
+            // clean-warp dotted slides: ThemePicker → Customize(1) → Project (Intro is dotless).
+            (1, 3)
         } else if is_terminal {
             (1, 4)
         } else {
